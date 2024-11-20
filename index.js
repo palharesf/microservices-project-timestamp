@@ -36,8 +36,28 @@ var listener = app.listen(process.env.PORT || 4000, function () {
 app.get("/api/:date?", function (req, res) {
   var date = req.params.date;
 
-  // Check if a date was passed, otherwise return current time
-  if (!date) {
+  // Check if a date was passed and is valid
+  if (date) {
+    var timestamp = !isNaN(date) ? parseInt(date) : date;
+    var parsedDate = new Date(timestamp);
+
+    // Case date was not valid
+    if (parsedDate.toString() == "Invalid Date") {
+      res.json({
+        error: "Invalid Date"
+      });
+    } 
+    // Case date was valid
+    else {
+      res.json({
+        unix: parsedDate.getTime(),
+        utc: parsedDate.toUTCString()
+      });
+    }
+  }
+
+  // If no date was passed, print the current date
+  else {
     res.json(
       {
         unix: new Date().getTime(),
@@ -45,22 +65,6 @@ app.get("/api/:date?", function (req, res) {
       }
     )
   }
-
-  // Check if date passed was valid
-  if (new Date(date).toString() === "Invalid Date") {
-    res.json(
-      {
-        error: "Invalid Date"
-      }
-    )
-  } else {
-    res.json(
-      {
-        unix: new Date(date).getTime(),
-        utc: new Date(date).toUTCString()
-      }
-    )
-  }  
 });
 
 
